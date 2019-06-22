@@ -46,9 +46,10 @@ public class ImageController {
     //Here a list of tags is added in the Model type object
     //this list is then sent to 'images/image.html' file and the tags are displayed
 
-    // Added by Amit Hiran - Assignment PART A - Changing the image get method based on Title to based on Image id.
     //@RequestMapping("/images/{title}")
     //public String showImage(@PathVariable("title") String title, Model model) {
+
+    // Added by Amit Hiran - Assignment PART A - Changing the image get method based on Title to based on Image id.
 
     @RequestMapping("/images/{imageId}/{title}") // Added imagId to @RequestMapping. Amit Hiran
     public String showImage(@PathVariable("imageId") Integer imageId, Model model) {
@@ -103,17 +104,19 @@ public class ImageController {
     public String editImage(@RequestParam("imageId") Integer imageId, Model model, HttpSession session, Error error){
         Image image = imageService.getImage(imageId);
 
-        User user = image.getUser(); // Get the user for the Image to be edited
-        User loggedInUser = (User) session.getAttribute("loggeduser"); // Get the user of the Http Session
+        User user = image.getUser(); // Get Image Owner(User)
+        User loggedInUser = (User) session.getAttribute("loggeduser"); // Get Http Session User
 
         String tags = convertTagsToString(image.getTags());
         model.addAttribute("image", image);
         model.addAttribute("tags", tags);
 
-        // Added if condition to check if the Owner of the Image is same as HTTP Session User.
-        if(user.getId() == loggedInUser.getId()) { // If True - Allow user to edit the image.
+        // If condition to check if Owner of Image is same as HTTP Session User
+        if(user.getId() == loggedInUser.getId()) { // If True - Allow user to edit the image
             return "images/edit";
-        } else{                                    // If false - Display error and do not allow user to edit image.
+        } else{                                    // If false - Display error and do not allow user to edit image
+            model.addAttribute("image", image);
+            model.addAttribute("tags", image.getTags());
             model.addAttribute("editError", error);
             return "images/image";
         }
@@ -158,12 +161,26 @@ public class ImageController {
     //This controller method is called when the request pattern is of type 'deleteImage' and also the incoming request is of DELETE type
     //The method calls the deleteImage() method in the business logic passing the id of the image to be deleted
     //Looks for a controller method with request mapping of type '/images'
-    @RequestMapping(value = "/deleteImage", method = RequestMethod.DELETE)
-    public String deleteImageSubmit(@RequestParam(name = "imageId") Integer imageId) {
-        imageService.deleteImage(imageId);
-        return "redirect:/images";
-    }
 
+    //public String deleteImageSubmit(@RequestParam(name = "imageId") Integer imageId) {
+
+    @RequestMapping(value = "/deleteImage", method = RequestMethod.DELETE)
+    public String deleteImageSubmit(@RequestParam(name = "imageId") Integer imageId, HttpSession session, Model model, Error error) {
+        // Following Code Added to Authorize - Only Owner of image to Delete Image.
+        Image image = imageService.getImage(imageId);
+        User user = image.getUser();
+        User loggedInUser = (User) session.getAttribute("loggeduser");
+
+        if(user.getId() == loggedInUser.getId()) {
+            imageService.deleteImage(imageId);
+            return "redirect:/images";
+        }else{
+            model.addAttribute("image", image); // Added Image to Model Attribute
+            model.addAttribute("tags", image.getTags()); // Added Image Tag to Model Attribute
+            model.addAttribute("deleteError", error);
+            return "images/image";
+        }
+    }
 
     //This method converts the image to Base64 format
     private String convertUploadedFileToBase64(MultipartFile file) throws IOException {
