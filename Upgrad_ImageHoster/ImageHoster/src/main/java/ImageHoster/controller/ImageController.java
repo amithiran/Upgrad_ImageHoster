@@ -154,7 +154,7 @@ public class ImageController {
 
         imageService.updateImage(updatedImage);
         //return "redirect:/images/" + updatedImage.getTitle();
-        model.addAttribute("tags", updatedImage.getTags());
+        model.addAttribute("tags", updatedImage.getTags());// Add tags after Image is Updated
         return "/images/image";
     }
 
@@ -172,14 +172,15 @@ public class ImageController {
         User user = image.getUser();
         User loggedInUser = (User) session.getAttribute("loggeduser");
 
-        if(user.getId() == loggedInUser.getId()) {
-            imageService.deleteImage(imageId);
+        //If Condition to Authorize only Owner of Image to delete Image
+        if(user.getId() == loggedInUser.getId()) { // Check If Image Owner(User) = Http User)
+            imageService.deleteImage(imageId);// If True - Call delete image method
             return "redirect:/images";
-        }else{
+        }else{                                  // If False - Display error and do not allow user to delete image
             model.addAttribute("image", image); // Added Image to Model Attribute
             model.addAttribute("tags", image.getTags()); // Added Image Tag to Model Attribute
-            model.addAttribute("deleteError", error);
-            return "images/image";
+            model.addAttribute("deleteError", error); // Directing to Error Message
+            return "images/image"; //Calling the images/image url
         }
     }
 

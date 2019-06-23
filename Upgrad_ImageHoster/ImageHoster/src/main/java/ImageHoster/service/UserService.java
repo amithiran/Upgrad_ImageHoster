@@ -4,6 +4,7 @@ import ImageHoster.model.User;
 import ImageHoster.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import sun.security.util.Password;
 
 @Service
 public class UserService {
@@ -32,4 +33,49 @@ public class UserService {
         }
     }
 
+    // Following method Added by Amit Hiran
+    // Following method under UserService check the Strength of Password
+    // Method checks that password has atleast 1 alphabet, 1 number & 1 special character
+    public boolean passwordStrenthCheck (String password) {
+        String checkPassword;
+        checkPassword = password;
+
+        boolean number = false;
+        boolean alpha = false;
+        boolean specialChar = false;
+
+        // Following for loop checks if password has atleast one number
+        for (int i = 0; i < password.length(); i++) {
+            if (Character.isDigit(password.charAt(i))) {
+                number = true; // if Yes set number = true
+                break; // Break out if found
+            }
+        }
+
+        // Following for loop checks if password has atleast one alphabet
+        for (int i = 0; i < password.length(); i++) {
+            if (Character.isLetter(password.charAt(i))) {
+                alpha = true;
+                break;
+            }
+        }
+
+        // Following for loop checks if password has atleast one Special Character
+        for (int i = 0; i < password.length(); i++) {
+            if (!(Character.isDigit(password.charAt(i))) && !(Character.isLetter(password.charAt(i)))) {
+                specialChar = true;
+                break;
+            }
+        }
+
+        // Following IF condition checks if all conditions 1 alphabet, 1 number & 1 special character are true
+
+        if (number == true && alpha == true && specialChar == true) {
+            return true; // if all true - return true
+        } else {
+            return false; // if any of the condition false - return false
+        }
+    }
 }
+
+

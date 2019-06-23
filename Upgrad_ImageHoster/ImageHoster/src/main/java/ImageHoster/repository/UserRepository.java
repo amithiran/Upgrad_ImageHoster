@@ -18,6 +18,7 @@ public class UserRepository {
     //The transaction is committed if it is successful
     //The transaction is rolled back in case of unsuccessful transaction
     public void registerUser(User newUser) {
+
         EntityManager em = emf.createEntityManager();
         EntityTransaction transaction = em.getTransaction();
 
